@@ -1,10 +1,73 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  
+  useEffect(() => {
+    const loadFonts = async () => {
+      try {
+        setFontsLoaded(true);
+      } catch (error) {
+        console.error("Error loading fonts:", error);
+      }
+    };
+    loadFonts();
+  }, []);
+
+
+  const isFormValid = () => {
+    return email.includes("@") && password === confirmPassword && password.length >= 8;
+  };
+
+
+  const handleLogin = () => {
+    if (!isFormValid()) {
+      Alert.alert(
+          "Try again",
+          "Please enter a valid email and matching passwords with at least 8 characters"
+      );
+      return;
+  }
+  try {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User logged in successfully:", user);
+        navigation.navigate("DashboardScreen");
+        alert("Login successful");
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'DashboardScreen'}],
+        });
+      })
+    } catch (error)  {
+        if (error.code === "auth/wrong-password") {
+          Alert.alert("Error", "The password is incorrect");
+        } else {
+          Alert.alert("Error", "Invalid credentials");
+        }
+      };
+    };
+      
+    if (!fontsLoaded) {
+      return null;
+    }
+
+    const signupBtn = () => {
+      navigation.navigate('SignupScreen')
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'SignupScreen'}],
+      });
+    }
+
 
   return (
     <View style={styles.container}>
@@ -35,10 +98,13 @@ const LoginScreen = ({ navigation }) => {
             placeholderTextColor="#888"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!isPasswordVisible}
           />
-          <TouchableOpacity style={styles.showPasswordButton}>
-            <Ionicons name="eye-off-outline" size={20} color="#888" />
+          <TouchableOpacity 
+            style={styles.showPasswordButton} 
+            onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+          >
+            <Ionicons name={isPasswordVisible ? "eye" : "eye-off-outline"} size={20} color="#888" />
           </TouchableOpacity>
         </View>
       </View>
@@ -47,11 +113,11 @@ const LoginScreen = ({ navigation }) => {
         <Text style={styles.forgotPasswordText}>Forgot password?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('DashboardScreen')}>
+      <TouchableOpacity style={styles.loginButton} onPress={(handleLogin)}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
+      <TouchableOpacity onPress={(signupBtn)}>
         <Text style={styles.signupText}>Don't have an account? Sign up</Text>
       </TouchableOpacity>
     </View>
@@ -64,6 +130,11 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#08051D',
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
   },
   titleContainer: {
     marginTop: 40,
@@ -106,7 +177,7 @@ const styles = StyleSheet.create({
     right: 20,
   },
   forgotPassword: {
-    marginBottom: 20,
+    marginBottom: 60,
     marginLeft: '50%',
   },
   forgotPasswordText: {
