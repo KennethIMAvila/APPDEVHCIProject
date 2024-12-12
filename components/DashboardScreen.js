@@ -1,43 +1,75 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, Switch } from 'react-native';
 import { Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getDatabase, ref, onValue, update } from 'firebase/database'; 
 
 const screenWidth = Dimensions.get('window').width;
 
 const DashboardScreen = ({ navigation }) => {
-    const temperature = 32.3;
-    const humidity = 27;
-    const lastUpdated = '2024-11-27 11:58:34';
+    const [temperature, setTemperature] = useState(null); 
+    const [humidity, setHumidity] = useState(null); 
+    const [history, setHistory] = useState([]); 
 
-    const chartData = {
-        labels: ['05:00', '06:00', '07:00', '08:00', '09:00'], // time; at least 5
-        datasets: [
-            {
-                data: [17.9, 23.9, 25.9, 28.1, 32.3], // the last 5 temperatures
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // temperature (white)
-            },
-            {
-                data: [51, 47, 43, 36, 27], // the last 5 humidities
-                strokeWidth: 2,
-                color: (opacity = 1) => `rgba(102, 217, 255, ${opacity})`, // humidity (lght blue)
-            },
-        ],
-    };
+    const db = getDatabase(); 
+    const temperatureRef = ref(db, '/sensorReading/temp'); 
+    const humidityRef = ref(db, '/sensorReading/humid'); 
 
-    const chartConfig = {
-        backgroundGradientFrom: '#262438',
-        backgroundGradientTo: '#262438',
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        decimalPlaces: 1,
-        propsForDots: {
-            r: '5',
-            strokeWidth: '2',
-            stroke: '#fff',
-        },
-    };
+    useEffect(() => {
+        const temperatureListener = onValue(temperatureRef, (snapshot) => {
+            const temp = snapshot.val();
+            if (temp !== null) {
+                setTemperature(temp);
+            }
+        });
+    
+        const humidityListener = onValue(humidityRef, (snapshot) => {
+            const hum = snapshot.val();
+            if (hum !== null) {
+                setHumidity(hum);
+            }
+        });
+    
+        return () => {
+            temperatureListener();
+            humidityListener();
+        };
+    }, []);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setHistory((prevHistory) => [
+                ...prevHistory,
+                { temperature, humidity, timestamp: new Date().toLocaleTimeString() }
+            ]);
+        }, 10000);
+    
+        return () => clearInterval(intervalId);
+    }, [temperature, humidity]);
+
+    const dashBtn = () => {
+        navigation.navigate('DashboardScreen');
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'DashboardScreen'}],
+        });
+    }
+
+    const aboutBtn = () => {
+        navigation.navigate('AboutScreen');
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'AboutScreen'}],
+        });
+    }
+
+    const logoutBtn = () => {
+        navigation.navigate('WelcomeScreen');
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'WelcomeScreen'}],
+        });
+    }
 
     return (
         <View style={styles.container}>
@@ -61,31 +93,19 @@ const DashboardScreen = ({ navigation }) => {
                 </View>
             </View>
 
-            <Text style={styles.lastUpdated}>Data last updated: {lastUpdated}</Text>
-
-            <View style={styles.chartContainer}>
-                {/* chart legend -- */}
-                <View style={styles.legendContainer}>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendColorBox, { backgroundColor: 'white' }]} />
-                        <Text style={styles.legendText}>Temperature</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendColorBox, { backgroundColor: '#66D9FF' }]} />
-                        <Text style={styles.legendText}>Humidity</Text>
-                    </View>
-                </View>
-                <LineChart
-                    data={chartData}
-                    width={screenWidth - 40}
-                    height={220}
-                    yAxisLabel=""
-                    yAxisInterval={1}
-                    chartConfig={chartConfig}
-                    withDots
-                    withVerticalLabels
-                />
-                <Text style={styles.historyTitle}>History</Text>
+            <View style={styles.historyContainer}>
+                <Text style={styles.historyTitle}>History (every 10 seconds)</Text>
+                <ScrollView style={styles.historyList} showsVerticalScrollIndicator={false}>
+                    {history.slice(-5).map((entry, index) => (
+                        <View key={index} style={styles.historyItem}>
+                            <Text style={styles.historyText}>
+                                {entry.timestamp}{'\n'}  
+                                Temp:<Text style={{ color: 'lightblue' }}> {entry.temperature}°C</Text>{'\n'}         
+                                Humidity: <Text style={{ color: 'lightgreen' }}> {entry.humidity}%</Text>
+                            </Text>
+                        </View>
+                    ))}
+                </ScrollView>
             </View>
 
             {/* navbar */}
@@ -147,43 +167,34 @@ const styles = StyleSheet.create({
         marginLeft: 4,
         alignSelf: 'flex-start',
     },
-    lastUpdated: {
-        fontSize: 14,
-        color: '#888',
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    chartContainer: {
-        backgroundColor: '#262438',
-        borderRadius: 12,
-        padding: 16,
-        alignItems: 'center',
+    historyContainer: {
+        backgroundColor: '#202438',
+        padding: 20,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        height: '35%',
     },
     historyTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: '#CCCCCC',
-        marginTop: 10,
+        color: '#fff',
+        marginBottom: 5,
+        textAlign: 'center',
     },
-    legendContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 10,
+    historyList: {
+        maxHeight: 200,
     },
-    legendItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: 10,
+    historyItem: {
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
     },
-    legendColorBox: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        marginRight: 5,
-    },
-    legendText: {
-        color: '#CCCCCC',
-        fontSize: 14,
+    historyText: {
+        fontSize: 16,
+        color: '#fff', // White for history text
     },
     bottomNav: {
         flexDirection: 'row',

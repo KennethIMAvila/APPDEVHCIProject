@@ -23,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
 
 
   const isFormValid = () => {
-    return email.includes("@") && password === confirmPassword && password.length >= 8;
+    return email.includes("@")&& password.length >= 8;
   };
 
 

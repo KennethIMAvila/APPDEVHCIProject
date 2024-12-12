@@ -3,6 +3,20 @@ import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import logo from '../assets/logo.png';
 
 const WelcomeScreen = ({ navigation }) => {
+  const loginBtn = () => {
+    navigation.navigate('LoginScreen')
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'LoginScreen'}],
+    });
+  }
+  const signupBtn = () => {
+    navigation.navigate('SignupScreen')
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'SignupScreen'}],
+    });
+  }
   return (
     <View style={styles.content}>
       <View style={styles.logoContainer}>
@@ -15,10 +29,10 @@ const WelcomeScreen = ({ navigation }) => {
       </Text>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
+        <TouchableOpacity style={styles.loginButton} onPress={(loginBtn)}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.signUpButton} onPress={() => navigation.navigate('SignupScreen')}>
+        <TouchableOpacity style={styles.signUpButton} onPress={(signupBtn)}>
           <Text style={styles.signUpButtonText}>Sign up</Text>
         </TouchableOpacity>
       </View>
