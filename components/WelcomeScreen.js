@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import logo from '../assets/logo.png';
 
 const WelcomeScreen = ({ navigation }) => {
@@ -36,7 +35,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginBottom: '25%',
-    marginTop: '60%',
+    marginTop: '30%',
   },
   logo: {
     width: 150,
@@ -59,7 +58,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    width: '80%',
+    width: '100%',
     maxWidth: 300,
   },
   loginButton: {

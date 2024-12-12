@@ -8,10 +8,6 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </TouchableOpacity>
-
       {/* Title container now aligned to the left */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Hey,</Text>
@@ -69,13 +65,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#08051D',
     justifyContent: 'center',
   },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
   titleContainer: {
-    marginTop: 220,
+    marginTop: 40,
     marginBottom: 40,
     alignItems: 'flex-start',
     width: '100%',
@@ -116,7 +107,7 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     marginBottom: 20,
-    marginLeft: '65%',
+    marginLeft: '50%',
   },
   forgotPasswordText: {
     color: 'white',

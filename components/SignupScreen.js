@@ -8,10 +8,6 @@ const SignupScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </TouchableOpacity>
-
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Let's get</Text>
         <Text style={styles.title}>started</Text>
@@ -59,7 +55,7 @@ const SignupScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('OTPScreen')}>
+      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
         <Text style={styles.loginButtonText}>Sign up</Text>
       </TouchableOpacity>
 
@@ -77,13 +73,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#08051D',
     justifyContent: 'center',
   },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
   titleContainer: {
-    marginTop: 220,
+    marginTop: 40,
     marginBottom: 40,
     alignItems: 'flex-start',
     width: '100%',

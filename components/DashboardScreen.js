@@ -119,16 +119,16 @@ const styles = StyleSheet.create({
         color: '#CCCCCC',
         textAlign: 'center',
         marginBottom: 40,
+        marginTop: 20,
     },
     dataContainer: {
-        marginBottom: 10,
         marginLeft: 10,
     },
     dataItem: {
         marginBottom: 15,
     },
     dataLabel: {
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#888',
     },
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         alignItems: 'baseline',
     },
     dataValue: {
-        fontSize: 120,
+        fontSize: 60,
         fontWeight: 'normalize',
         color: 'white',
     },
